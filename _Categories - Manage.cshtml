@@ -1,0 +1,20 @@
+@using ToSic.Eav.DataSources
+@{
+	// Sort by Name
+	var categories = CreateSource<ValueSort>(App.Data["Category"]);
+	categories.Attributes = "Name";
+}
+<h2>Edit Categories</h2>
+<p class="sc-element">Found @categories.List.Count()
+	<ul class="sc-menu" data-toolbar='{"action":"new"}'></ul>
+</p>
+<ol>
+	@foreach (var dict in categories.List)
+	{
+		var cat = AsDynamic(dict);
+		<li class="sc-element">
+			<ul class="sc-menu" data-toolbar='{"entityId" : @cat.EntityId, "action":"edit"}'></ul>
+		@cat.Name
+	</li>
+	}
+</ol>

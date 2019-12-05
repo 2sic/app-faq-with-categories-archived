@@ -1,0 +1,43 @@
+@using ToSic.Eav.DataSources
+@using ToSic.SexyContent
+@functions{
+    // Prepare the data - get all categories through the pipeline
+    public override void CustomizeData()
+    {
+        // new features in 6.1 - the App DataSource CreateSource<App> and also the RelationshipFilter
+        // Just add the items which have the relationship to the category in the URL
+        var qsOfCat = CreateSource<RelationshipFilter>(App.Data["QandA"]);
+        qsOfCat.Relationship = "Categories";
+        qsOfCat.Filter = "[QueryString:Category||" + (Content.Category.Count > 0 ? Content.Category[0].Name : "") + "]";
+        Data.In.Add("QandA", qsOfCat["Default"]);
+    }
+}
+
+<h2>@Content.Title @Request["Category"] @Content.Toolbar</h2>
+@if (Data["QandA"].List.Count == 0)
+{
+	<text>No questions found. Please choose a category</text>
+}
+else
+{
+    <ol>
+        @foreach (var q in AsDynamic(Data["QandA"]))
+        {
+            <li class="sc-element faq-set" data-tags="@String.Join(",", ((List<DynamicEntity>)q.Categories).Select(a => AsDynamic(a).EntityId))">
+                @q.Toolbar
+                <a class="faq-question" style="cursor: pointer">
+                    @q.Question
+                </a>
+                <div class="faq-answer" style="display: none">@Html.Raw(q.Answer)</div>
+            </li>
+        }
+
+    </ol>
+}
+
+<script src="@App.Path/assets/faq.js" data-enableoptimizations="true"></script>
+<script>
+    $(document).ready(function() {
+        initFaqSection("DnnModule-" + @Dnn.Module.ModuleID, "@Presentation.ShowEffect");
+    });
+</script>

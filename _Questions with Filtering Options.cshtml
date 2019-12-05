@@ -1,0 +1,52 @@
+@using ToSic.SexyContent
+@functions
+{
+    // variable which will contain the sorted categories
+    IEnumerable<dynamic> sortedCategories;
+
+    // Prepare the data - get all categories through the pipeline
+    public override void CustomizeData()
+    {
+        // get all categories of these questions, then get the distinct entities 
+        // this could all be done on 1 line, but it would be harder for people who don't know LINQ yet
+        var questionsInThisModule = AsDynamic(Data["Default"].List);
+        var categoriesUsed = questionsInThisModule.SelectMany(q => ((List<DynamicEntity>)q.Categories));
+        var distinctCategories = categoriesUsed.Select(AsEntity).Distinct();    // Distinct only works reliably when cast as entity
+        sortedCategories = AsDynamic(distinctCategories).OrderBy(q => q.Name);
+    }
+    
+}
+<h2 class="sc-element">@ListContent.Title @ListContent.Toolbar</h2>
+<div>@Html.Raw(ListContent.Introduction)</div>
+
+<div>
+    <strong>@App.Resources.FilterBy </strong>
+    <select id="ddlFeatureFilter">
+        <option value="all">@App.Resources.ShowAll</option>
+        @foreach (var cat in sortedCategories)
+        {
+            <option value="@cat.EntityId">@cat.Name</option>
+        }
+    </select>
+</div>
+
+<ol>
+    @foreach (var q in AsDynamic(Data["Default"].List))
+    {
+        <li class="sc-element faq-set" data-tags="@String.Join(",", ((List<DynamicEntity>)q.Categories).Select(a => AsDynamic(a).EntityId))">
+            @q.Toolbar
+            <a class="faq-question" style="cursor: pointer">
+                @q.Question
+            </a>
+            <div class="faq-answer" style="display: none">@Html.Raw(q.Answer)</div>
+        </li>
+    }
+
+</ol>
+
+<script src="@App.Path/assets/faq.js" data-enableoptimizations="true"></script>
+<script>
+	$(document).ready(function() {
+		initFaqSection("DnnModule-" + @Dnn.Module.ModuleID, "@ListPresentation.ShowEffect");
+	});
+</script>

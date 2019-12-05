@@ -1,0 +1,19 @@
+@using ToSic.Eav.DataSources
+@functions{
+	// Prepare the data - get all categories through the pipeline
+	public override void CustomizeData()
+	{
+		// Sort by FullName
+		var sortedCats = CreateSource<ValueSort>(App.Data["Category"]);
+		sortedCats.Attributes = "Name";
+		Data.In.Add("Categories", sortedCats["Default"]);
+	}
+}
+<h2 class="sc-element">@Content.Title @Content.Toolbar</h2>
+<div>@Html.Raw(Content.Introduction)</div>
+<ol>
+	@foreach (var cat in AsDynamic(Data["Categories"]))
+	{
+		<li><a href="@Content.Page?Category=@Uri.EscapeDataString(cat.Name)">@cat.Name</a></li>
+	}
+</ol>

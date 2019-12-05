@@ -1,0 +1,22 @@
+@using ToSic.SexyContent
+<h2 class="sc-element">@Content.Title @Content.Toolbar</h2>
+<div>@Html.Raw(Content.Introduction)</div>
+<ol>
+    @foreach (var q in AsDynamic(Content.Questions))
+    {
+        <li class="sc-element faq-set" data-tags="@String.Join(",", ((List<DynamicEntity>)q.Categories).Select(a => AsDynamic(a).EntityId))">
+            @q.Toolbar
+            <a class="faq-question" style="cursor: pointer">
+                @q.Question
+            </a>
+            <div class="faq-answer" style="display: none">@Html.Raw(q.Answer)</div>
+        </li>
+    }
+</ol>
+
+<script src="@App.Path/assets/faq.js" data-enableoptimizations="true"></script>
+<script>
+	$(document).ready(function() {
+		initFaqSection("DnnModule-" + @Dnn.Module.ModuleID, "@Presentation.ShowEffect");
+	});
+</script>
